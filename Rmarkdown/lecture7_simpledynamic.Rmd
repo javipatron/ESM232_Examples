@@ -19,74 +19,6 @@ library(purrr)
 library(deSolve)
 ```
 
-# Return to big picture - model types
-
-![](../lectures/dynamicmodels/dynamicmodels.001.jpeg)
----
-
-# Dynamic Models
-
-![](../lectures/dynamicmodels/dynamicmodels.002.jpeg)
----
-
-# Spatial models that interact - similar to dynamic
-
-* Key idea is dependency from one point in time/space to the next!
-
-* This implies a differential/difference equation to describe the process/transfer function
-
-![](../lectures/dynamicmodels/dynamicmodels.003.jpeg)
----
-
-# Dynamic modeling
-
-![](../lectures/dynamicmodels/dynamicmodels.004.jpeg)
----
-
-# Why you should care
-
-![](../lectures/dynamicmodels/dynamicmodels.005.jpeg)
----
-
-# Vocab
-
-![](../lectures/dynamicmodels/dynamicmodels.006.jpeg)
-
-![](../lectures/dynamicmodels/dynamicmodels.007.jpeg)
----
-
-# Examples - note the feedback loops (time dependency)
-
-![](../lectures/dynamicmodels/dynamicmodels.008.jpeg)
----
-![](../lectures/dynamicmodels/dynamicmodels.009.jpeg)
----
-
-# Feekback is a key feature of dynamic models
-
-![](../lectures/dynamicmodels/dynamicmodels.010.jpeg)
----
-
-# Stability
-
-![](../lectures/dynamicmodels/dynamicmodels.011.jpeg)
----
-
-# Simple Example
-
-![](../lectures/dynamicmodels/dynamicmodels.012.jpeg)
----
-![](../lectures/dynamicmodels/dynamicmodels.013.jpeg)
----
-![](../lectures/dynamicmodels/dynamicmodels.014.jpeg)
----
-![](../lectures/dynamicmodels/dynamicmodels.015.jpeg)
----
-![](../lectures/dynamicmodels/dynamicmodels.016.jpeg)
----
-![](../lectures/dynamicmodels/dynamicmodels.017.jpeg)
----
-
 # Implementing Dynamic Models in R
 
 Dynamic models always involves derivatives (equations that express how things change from time step to time step or place to place )
@@ -97,7 +29,7 @@ Implement population growth as a derivative - a model of population change
 ```{r derivaties, echo=TRUE}
 
 # note that we include time here but we don't use it; we will need this later
-source("../R/dexppop.R")
+source("/Users/javipatron/Documents/MEDS/Courses/eds230/classes/ESM232_Examples/R/dexppop.R")
 
 dexppop
 # see how it works
@@ -139,7 +71,7 @@ Two options
 # Explicit Solution is available
 
 ```{r explicit}
-source("../R/exppop.R")
+source("/Users/javipatron/Documents/MEDS/Courses/eds230/classes/ESM232_Examples/R/exppop.R")
 
 exppop
 
