@@ -14,11 +14,13 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-
 library(sensitivity)
 library(tidyverse)
 library(lhs)
 library(purrr)
+library(here)
+
+
 ```
 
 # Sobol
@@ -93,7 +95,7 @@ Atmospheric Conductance as a function of windspeed, vegetation height and parame
 First lets get the parameters
 
 ```{r}
-source("../R/Catm.R")
+source("/Users/javipatron/Documents/MEDS/Courses/eds230/classes/ESM232_Examples/R/Catm.R")
 
 # generate two examples of random number from parameter distributions
 
