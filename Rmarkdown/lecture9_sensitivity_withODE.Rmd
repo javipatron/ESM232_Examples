@@ -31,12 +31,13 @@ library(sensitivity)
 # Diffusion Example
 
 ```{r}
+setwd("/Users/javipatron/Documents/MEDS/Courses/eds230/classes/ESM232_Examples/Rmarkdown")
 source("../R/diffusion.R")
 
 
 # Change parameters (diffusivity D, and space and time steps (dx, dt))
 
-res=diff1(initialC=100,nx=10,dx=1,nt=10,dt=30,D=0.001,area=1)
+res = diff1(initialC=100,nx=10,dx=1,nt=10,dt=30,D=0.001,area=1)
 filled.contour(res$conc, xlab="Time", ylab="Distance", main = "Concentration through time and space")
 
 
@@ -56,7 +57,7 @@ filled.contour(resfast$qin, xlab="Time", ylab="Distance", main="Qin")
 # if things are changing quickly we need to use much smaller time, space steps to avoid overshoot and instability
 
 # so lets cut our step size by 10 (dt) (but then  multiply number of steps (nx) to cover the same distance)
-resfast_fixtime=diff1(initialC=100,nx=10,dx=0.5,nt=100,dt=1,D=0.08,area=1)
+resfast_fixtime = diff1(initialC=100,nx=10,dx=0.5,nt=100,dt=1,D=0.08, area=1)
 filled.contour(resfast_fixtime$conc, xlab="time",ylab="Distance Along Path", main="Concentration through time and space")
 
 filled.contour(resfast_fixtime$qin, xlab="Time", ylab="Distance", main="Qin")
@@ -144,15 +145,10 @@ Ideas?
 Depends on what is important for your model application
 
 * max
-
 * mean
-
 * min
-
 * total
-
 * variation
-
 * time it takes for something to happen
 
 So a key step in sensitivity analysis with a dynamics model is summarizing results into a few key measures
