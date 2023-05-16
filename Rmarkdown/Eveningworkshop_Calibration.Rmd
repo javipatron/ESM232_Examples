@@ -20,7 +20,30 @@ library(lubridate)
 library(reldist)
 library(purrr)
 library(ggpubr)
+
+
+# library(tsibble)
+# library(fable)
+# library(ggplot2)
+
+
+
+# library(tidyverse)
+# library(readr)
+# library(gt)
+library(tufte)
+library(feasts)
+# library(kableExtra)
+# library(xtable)
+library(ggpmisc)
+
 ```
+
+
+```{r}
+setwd("/Users/javipatron/Documents/MEDS/Courses/eds230/classes/ESM232_Examples/Rmarkdown")
+```
+
 
 # Background material
 
@@ -103,10 +126,11 @@ cper(m=sager_wy$model, o=sager_wy$obs, weight.nse=0.8)
 
 # just look at august flow
 # first sum by month
-tmp = sager %>% group_by(wy, month) %>% summarize(model=sum(model), obs=sum(obs))
+tmp = sager %>% group_by(wy, month) %>% summarize(model = sum(model), 
+                                                  obs = sum(obs))
 
 # now extract august
-sager_aug = subset(tmp, month==8)
+sager_aug = subset(tmp, month == 8)
 cor(sager_aug$model, sager_aug$obs)
 
 ```
@@ -119,10 +143,64 @@ cor(sager_aug$model, sager_aug$obs)
 
 * Code that metric as a function - and then apply it
 
+```{r}
+diff_of_sum <- function(data){
+  difference <- data |> 
+    group_by(wy) |> 
+    summarize(difference_obs_mod = sum(model) - sum(obs))
+  return(difference)
+}
+```
+
+
+```{r}
+test <- diff_of_sum(sager)
+```
+
+
+```{r}
+
+as_tsibble(sager) |> 
+model(classical_decomposition(model, type = "additive")) |> 
+components() |> 
+autoplot() +
+labs(title = "title")
+
+```
+
+```{r}
+
+library(zoo)
+
+# Convert month and year columns to Date format
+sager$date <- as.Date(paste(sager$year, sager$month, "1", sep="-"), format="%Y-%m-%d")
+
+# Create a new column for quarters
+sager$quarter <- quarters(sager$date)
+
+
+sager %>%
+  group_by(wy, quarter) %>%
+  summarise(mean_obs = mean(obs),
+            mean_model = mean(model)) %>%
+  pivot_longer(cols = c(mean_obs, mean_model),
+               names_to = "type",
+               values_to = "values") %>%
+  ggplot(aes(x = quarter, y = values, group = type, color = type)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ wy, nrow = 2) +
+  scale_color_discrete(name = "Water Year") +
+  labs(title = "Mean Observed vs. Modeled by Quarter and Water Year",
+       x = "Quarter",
+       y = "Mean Value")
+
+```
+
+
 # Using multiple metrics. 
 
 * depends on what you want the model to get right
-
 * type of data that you have for evaluation (its resolution and accuracy)
 
 
@@ -132,25 +210,40 @@ cor(sager_aug$model, sager_aug$obs)
 source("../R/compute_lowflowmetrics.R")
 compute_lowflowmetrics
 
-compute_lowflowmetrics(m=sager$model,o=sager$obs, month=sager$month, day=sager$day, year=sager$year, wy=sager$wy)
+compute_lowflowmetrics(m=sager$model,
+                       o=sager$obs, 
+                       month=sager$month, 
+                       day=sager$day, 
+                       year=sager$year, 
+                       wy=sager$wy)
 
 # use different low flow months
-compute_lowflowmetrics(m=sager$model,o=sager$obs, month=sager$month, day=sager$day, year=sager$year, wy=sager$wy, low_flow_months = c(7:9))
+compute_lowflowmetrics(m=sager$model,
+                       o=sager$obs, 
+                       month=sager$month, 
+                       day=sager$day, 
+                       year=sager$year, 
+                       wy=sager$wy, 
+                       low_flow_months = c(7:9))
 
 ```
   
 # Combining  multiple metrics into a single value 
 
-
 * if you want a quantitative comparison between multiple models
-
 * useful for calibration
 
 **Slides 23-26**
 
 ```{r combined}
 
-perf = compute_lowflowmetrics(m=sager$model,o=sager$obs, month=sager$month, day=sager$day, year=sager$year, wy=sager$wy, low_flow_months = c(7:9))
+perf = compute_lowflowmetrics(m=sager$model,
+                              o=sager$obs, 
+                              month=sager$month, 
+                              day=sager$day, 
+                              year=sager$year, 
+                              wy=sager$wy, 
+                              low_flow_months = c(7:9))
 
 perf = as.data.frame((perf))
 
@@ -189,6 +282,8 @@ source("../R/compute_lowflowmetrics_all.R")
 compute_lowflowmetrics_all
 
 ```
+
+
 # Your turn! Part 1: Come up with a combined metric that you think is interesting 
 
 * include at least one "sub" metric that needs to be transformed (for example, the `annual_min_err_trans` above)
@@ -241,7 +336,6 @@ msage = read.table("../Data/sagerm.txt", header=T)
 nsim = ncol(msage)
 snames = sprintf("S%d",seq(from=1, to=nsim))
 colnames(msage)=snames
-
 
 # lets say we know the start date from our earlier output
 msage$date = sager$date
@@ -314,10 +408,6 @@ best = res[which.max(res$combined),]
  
  compruns_mwyl = compruns_mwy %>% pivot_longer(cols=!c(month,wy), names_to="sim", values_to="flow")
  compruns_mwyl %>% subset(month==8) %>% ggplot(aes(sim,flow ))+geom_boxplot()
- 
-
-
-
 
 ```
 
