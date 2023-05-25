@@ -102,6 +102,8 @@ Let's consider harvesting as **exogenous** first - simply change the starting co
 # Exogeneous model
 
 ```{r forest}
+
+
 source("../R/dexppopK.R")
 
 dexppopK
@@ -118,7 +120,9 @@ postfire_initial_carbon = 2
 forest = ode(y=postfire_initial_carbon, times=tm, dexppopK, parms=forestparms)
 
 colnames(forest)=c("time","carbon")
-ggplot(as.data.frame(forest),aes(time, carbon) )+geom_line()
+
+ggplot(as.data.frame(forest),aes(time, carbon)) + 
+  geom_line()
 
 
 ```
@@ -142,11 +146,12 @@ dharvest
 # try it out
 tm = seq(from=1, to=500)
 Cinitial = 1
-gps = list(harv=0.18, K=100, r=0.2)
+gps = list(harv=0.19 , K=100, r=0.2)
 res = ode(Cinitial,tm, dharvest, gps)
 colnames(res)=c("time","carbon")
 
-ggplot(as.data.frame(res), aes(time, carbon))+geom_point()
+ggplot(as.data.frame(res), aes(time, carbon)) + 
+  geom_point()
 
 
 ```
@@ -178,8 +183,11 @@ colnames(res)=harvestr
 res=as.data.frame(res)
 res$time=tm
 # put in to a form where we can plot
-resl = gather(res, key="harvestr",value="carbon", -time)
-ggplot(resl,aes(time, carbon, col=harvestr))+geom_line()
+resl = gather(res, key="harvestr", value="carbon", -time)
+
+
+ggplot(resl,aes(time, carbon, col=harvestr)) + 
+  geom_line()
 
 
 # notice that stable forest value changes with harvest rates
@@ -190,6 +198,8 @@ ggplot(resl,aes(time, carbon, col=harvestr))+geom_line()
 ggplot(subset(resl, time < 10),aes(time, carbon, col=harvestr))+geom_line()
 
 ```
+
+
 # Interactions
 
 How do different harvest rates interact with different growth rates (and/or) carrying capacity?
@@ -199,9 +209,7 @@ Common "type" of question - how does disturbance interact with the properties (p
 Explore on your own
 
 Try different combination of growth and 
-harvest rates...
-
-notice how carbon growth changes...what does stability mean - can you find parameter sets that lead to a stable non-zero forest
+harvest rates...notice how carbon growth changes...what does stability mean - can you find parameter sets that lead to a stable non-zero forest
 
 # Sensitivity Analysis
 
@@ -221,8 +229,8 @@ source("../R/dharvest.R")
 
 # lets assume a uniform distribution of harvest rates
 # and of normal growth rates
-np=200
 
+np=200
 r = rnorm(mean=0.3, sd=0.05, n=np)
 harv = runif(min=0.0, max=0.4, n=np)
 K = 
@@ -236,7 +244,8 @@ X2 = cbind.data.frame(r=r, harv=harv)
 # create our sobel object and get sets of parameters for running the model
 
 sens_forest = sobolSalt(model = NULL,X1, X2, nboot = 300)
-colnames(sens_forest$X)= c("r","harv")
+colnames(sens_forest$X) = c("r","harv")
+
 # do a quick test
 # try it out
 tm = seq(from=1, to=50)
@@ -270,13 +279,13 @@ tm = seq(from=1, to=50)
 Cinitial = 1
 
 
-allresults = as.data.frame(sens_forest$X) %>% pmap(p_wrapper, K=100, Cinitial=Cinitial, simtimes=tm, func=dharvest)
+allresults = as.data.frame(sens_forest$X) %>% pmap(p_wrapper, K=300, Cinitial=Cinitial, simtimes=tm, func=dharvest)
 
 # extract out results from pmap into a data frame
 allres = allresults %>% map_dfr(`[`,c("C10","C50"))
-
-tmp = allres %>% gather(key="metric", value="value")
-ggplot(tmp, aes(metric, value, col=metric))+geom_boxplot()
+# 
+# tmp = allres %>% gather(key="metric", value="value")
+# ggplot(tmp, aes(metric, value, col=metric))+geom_boxplot()
 
 # link with parameters to see how parameters together
 # impact something we care about C50

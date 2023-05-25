@@ -1,0 +1,147 @@
+## **Assignment Tasks:**
+
+Read in the libraries
+```{r, include = F}
+library(tidyverse)
+library(deSolve)
+library(sensitivity)
+```
+
+```{r}
+#' Forest size growth derivative
+#'
+#' @param Time time since start
+#' @param C forest size (in kgC)
+#' @param parms as list with four values, K, r, g, and thresh
+#' @param K canopy closure threshold and carrying capacity(
+#' @param r pre canopy closure growth rate
+#' @param g post-canopy closure growth rate
+#' @param thresh threshold value for forest size when growth function uses g instead of r
+#'
+#'
+#' @return derivative of forest size with time
+#' @export
+#'
+#' @examples
+forest_growth <- function (Time, C, parms) {
+  if (C <= parms$thresh) {
+    dC = parms$r * C
+  } else {
+    dC = parms$g * (1 - C/parms$K)
+  }
+  return(list(dC))
+}
+
+```
+
+#### Q2
+```{r, warning=FALSE, message=FALSE}
+C_initial = 10 #initial size of forest
+parms_initial = c(list(K=250, r=0.1, g=2, thresh = 50)) #set initial parameters
+# gets results for 300 years (evaluating every year)
+simtimes = seq(from=1, to=300)
+#obtain forest size at each time step
+result = ode(y=C_initial, times=simtimes, func=forest_growth, parms=parms_initial)
+#head(result) #check first rows of result
+colnames(result)=c("time","C") #adjust column names
+# turn it into a data frame
+result = as.data.frame(result)
+```
+
+#### Q3
+```{r, warning=FALSE, message=FALSE}
+#plot the forest size over time using the parameters specified above
+ggplot(result, aes(time, C)) +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Forest Growth over Time (in kgC)")
+```
+**As expected, there is an inflection point at C=50, where the canpy threshold is hit and the growth equation shifts away from exponential growth.
+#### Q4
+```{r, warning=FALSE, message=FALSE}
+np=2000
+K = rnorm(mean=250, sd=25, n=np)
+r = rnorm(mean=0.01, sd=0.001, n=np)
+g = rnorm(mean=2, sd=0.2, n=np)
+thresh = rnorm(mean=50, sd=5, n=np)
+X1 = cbind.data.frame(K=K, r=r, g=g, thresh = thresh)
+# repeat to get our second set of samples
+
+
+K = rnorm(mean=100, sd=10, n=np)
+r = rnorm(mean=0.01, sd=0.001, n=np)
+g = rnorm(mean=2, sd=0.2, n=np)
+thresh = rnorm(mean=50, sd=5, n=np)
+X2 = cbind.data.frame(K=K, r=r, g=g, thresh = thresh)
+# fix any negative values and they are not meaningful
+X1 = X1 %>% map_df(pmax, 0.0) #run each parameter set through pmax to make sure no negative values for parameters (carrying capacity and growth rates)
+X2 = X2 %>% map_df(pmax, 0.0)
+# create our sobel object and get sets ofparameters for running the model
+sens_C = sobolSalt(model = NULL,X1, X2, nboot = 300)
+head(sens_C$X)
+# lets add names
+colnames(sens_C$X) = c("K","r", "g", "thresh")
+```
+
+
+
+
+```{r, warning=FALSE, message=FALSE}
+# turn computing our metrics into a function
+compute_metrics = function(result) {
+  max_size = max(result$C)
+  return(list(max_size = max_size))
+  
+  }
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+# try it on our first parameter set, and look at when it gets to 100
+compute_metrics(result)
+
+c_wrapper = function(K, r, g, thresh, C_initial, simtimes, func) {
+  parms = list(K=K, r=r, g=g, thresh=thresh)
+  result = ode(y=C_initial, times=simtimes, func=func, parms=parms)
+  colnames(result)=c("time","C")
+  # get metrics
+  metrics=compute_metrics(as.data.frame(result))
+  return(metrics)
+}
+
+
+# now use pmap as we did before
+allresults = as.data.frame(sens_C$X) %>% pmap(c_wrapper,
+                                              C_initial = C_initial,
+                                              simtimes=simtimes,
+                                              func=forest_growth)
+
+
+# extract out results from pmap into a data frame
+allres = allresults %>% map_dfr(`[`,c("max_size"))
+# create boxplots
+tmp = allres %>% pivot_longer(cols=everything(),names_to="metric", values_to="value")
+```
+
+
+#### Q5
+```{r, warning=FALSE, message=FALSE}
+ggplot(tmp, aes(metric, value)) +
+  geom_boxplot(fill = "steelblue") +
+  theme_minimal() +
+  labs(
+    title = "Sensitivity Analysis of Maximum Forest Size",
+    x = "Metric",
+    y = "Max Forest Size (kgC)")
+```
+
+
+#### Q6
+```{r, warning=FALSE, message=FALSE}
+# sobol can only handle one output at a time
+sens_C_max_size = sensitivity::tell(sens_C,allres$max_size)
+# first-order indices (main effect without co-variance)
+sens_C_max_size$S
+# total sensitivity index -note that this partitions the output variance
+sens_C_max_size$T
+```
