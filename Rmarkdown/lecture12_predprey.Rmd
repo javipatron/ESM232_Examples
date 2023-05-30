@@ -9,6 +9,9 @@ output:
     highlight: pygments
   beamer_presentation:
     highlight: pygments
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -24,108 +27,128 @@ library(ggpubr)
 
 # Systems of equations
 
-What if we have more than one variable that is evolving through time and space?
+What if we have more than one variable that is evolving through time and
+space?
 
+-   populations of two species that are changing through time, and
+    interact with each other
 
-  * populations of two species that are changing through time, and interact with each other
-  
-  * pollutant concentrations in a diffusion-advection model where the two pollutants also interact with each other
-  
-  * growth of above-ground and below-ground carbon and nitrogen in a forest
-  
-  * household consumption and savings through time (when consumption depends on savings and vice versa)
-  
+-   pollutant concentrations in a diffusion-advection model where the
+    two pollutants also interact with each other
 
-These require several differential equations that have to be solved simultaneously 
+-   growth of above-ground and below-ground carbon and nitrogen in a
+    forest
 
-<span style="color:orange">Systems of equations</span>
+-   household consumption and savings through time (when consumption
+    depends on savings and vice versa)
+
+These require several differential equations that have to be solved
+simultaneously
+
+[Systems of equations]{style="color:orange"}
 
 # Systems of equations
 
-* can be ordinary (differentiating with respect to one variable (time or space))
+-   can be ordinary (differentiating with respect to one variable (time
+    or space))
 
-* partial if differentiating with respect to multiple variables (x,y,z, time)
+-   partial if differentiating with respect to multiple variables
+    (x,y,z, time)
 
+We can estimate trajectories of systems of equations in much the same
+way that we used numerical integration for our ODE's
 
-We can estimate trajectories of systems of equations in much the same way that we
-used numerical integration for our ODE's
-
-
-Here again methods (especially for complicated parital derivative system of equations ) can be complicated
+Here again methods (especially for complicated parital derivative system
+of equations ) can be complicated
 
 Call your engineering/math when you run into issues!
 
 # Dynamics of two (or more) variables
 
-* two variable dynamic models that have feedbacks between variables can create cyclical
-dynamics (and more complex )
+-   two variable dynamic models that have feedbacks between variables
+    can create cyclical dynamics (and more complex )
 
-* Two ways to look at results
+-   Two ways to look at results
 
-  * time series of each state variable
-  
-  * how state variables interact with each other
+    -   time series of each state variable
 
+    -   how state variables interact with each other
 
-#  Predator-Prey Models 
+# Predator-Prey Models
 
 Predator-Prey models
 
-A simple approach that assumes
-prey grow exponentially, with a fixed intrinsic growth rate
+A simple approach that assumes prey grow exponentially, with a fixed
+intrinsic growth rate
 
-* a fixed mortality rate of predators
-* a fixed rate of consumption/predation rate of prey by predators
-* a fixed conversion rate (ingestion rate) that determines how many “new” predators you get with predation
-* no environmental effects (e.g no carrying capacity)
+-   a fixed mortality rate of predators
+-   a fixed rate of consumption/predation rate of prey by predators
+-   a fixed conversion rate (ingestion rate) that determines how many
+    "new" predators you get with predation
+-   no environmental effects (e.g no carrying capacity)
 
+------------------------------------------------------------------------
 
-
----
-
-#  Predator-Prey Model 
+# Predator-Prey Model
 
 Analogs
 
-As with diffusion, the basic form/ideas in this model can be applied elsewhere
+As with diffusion, the basic form/ideas in this model can be applied
+elsewhere
 
-* economics
+-   economics
 
-* infectious disease spread
+-   infectious disease spread
 
-* combustion
+-   combustion
 
----
+------------------------------------------------------------------------
 
 # Differential equations for a Predator-Prey Model
 
-* Prey
+-   Prey
 
 $\frac{\partial prey}{\partial t} = r_{prey} * prey - \alpha * prey * pred$
 
-* Predator
+-   Predator
 
 $\frac{\partial pred}{\partial t} = eff * \alpha * pred * prey - mort * pred$
 
 # Predator Prey - Implementation in R
 
-* Ordinary Differential Equation with two dependent variables
+-   Ordinary Differential Equation with two dependent variables
 
-* Still use **ODE** solve in R
+-   Still use **ODE** solve in R
 
-* Still code the derivative as a function 
+-   Still code the derivative as a function
 
-* Use lists or vectors to bring in initial conditions for all dependent variables; (similar how we bring in multiple parameters to derivative definition function)
+-   Use lists or vectors to bring in initial conditions for all
+    dependent variables; (similar how we bring in multiple parameters to
+    derivative definition function)
 
-* use *with* can help make it easier to code the use of parameters within the derivative definition function (see example below)
+-   use *with* can help make it easier to code the use of parameters
+    within the derivative definition function (see example below)
 
-* use lists to output derivatives for all dependent variable
+-   use lists to output derivatives for all dependent variable
 
 # Example implementation
 
+Define function and equation
+
 ```{r}
-source("../R/lotvmod.R")
-lotvmod
+
+lotvmod <- function(t, pop, pars) {
+with(as.list(c(pars,pop)), {
+dprey = rprey*prey -  alpha*prey*pred
+dpred = eff*alpha*prey*pred - pmort*pred
+return(list(c(dprey,dpred)))})
+}
+
+
+
+```
+
+```{r}
 
 # note the use of with
 # initial conditions
@@ -145,16 +168,17 @@ res = ode(func=lotvmod, y=currpop, times=days, parms=pars)
 
 # Visualizing results
 
-* two variable dynamic models that have feedbacks between variables can create cyclical
-dynamics (and more complex )
+-   two variable dynamic models that have feedbacks between variables
+    can create cyclical dynamics (and more complex )
 
-* Two ways to look at results
+-   Two ways to look at results
 
-  * time series of each state variable  (pred and prey)
-  
-  * how state variables interact with each other
+    -   time series of each state variable (pred and prey)
+
+    -   how state variables interact with each other
 
 # Relationship between populations
+
 ```{r}
 # graph the results
 head(res)
@@ -179,17 +203,16 @@ ggarrange(p1,p2b)
 
 ```
 
-#Try other parameters - try to bring relative size of predictors (versus prey) higher
-
+#Try other parameters - try to bring relative size of predictors (versus
+prey) higher
 
 # Other illustations
 
-
-* Prey
+-   Prey
 
 $\frac{\partial prey}{\partial t} = r_{prey} * prey - \alpha * prey * pred$
 
-* Predator
+-   Predator
 
 $\frac{\partial pred}{\partial t} = eff * \alpha * pred * prey - mort * pred$
 
@@ -197,14 +220,13 @@ Predator and Prey with Carrying Capacity?
 
 How would you code that?
 
-
 # With Carrying Capacity
 
-* Prey
+-   Prey
 
 $\frac{\partial prey}{\partial t} = r_{prey} * (1-\frac{prey}{K})*prey - \alpha * prey * pred$
 
-* Predator
+-   Predator
 
 $\frac{\partial pred}{\partial t} = eff * \alpha * pred * prey - mort * pred$
 
@@ -258,10 +280,7 @@ $\frac{\partial s_2}{\partial t} = r_{2} * s_2 * (1-(\frac{s_2+\alpha_{21} * s_1
 
 How might you explain what this is doing?
 
-
-
 # Competition
-
 
 Species 1 (or Company 1)
 
@@ -271,36 +290,33 @@ Species 2 (or Company 2)
 
 $\frac{\partial s_2}{\partial t} = r_{2} * s_2 * (1-(\frac{s_2+\alpha_{21} * s_1}{K_2}))$
 
-* $s_1, s_2$ are species populations
-* $r_1, r_2$ are growth rates of each species
-* $K_1, K_2$ are carrying capacities; could be the same for both species but maybe not?
-* $\alpha_{12}, \alpha_{21}$ are competitive effect of the other species; could be the same for both species
-
-
+-   $s_1, s_2$ are species populations
+-   $r_1, r_2$ are growth rates of each species
+-   $K_1, K_2$ are carrying capacities; could be the same for both
+    species but maybe not?
+-   $\alpha_{12}, \alpha_{21}$ are competitive effect of the other
+    species; could be the same for both species
 
 # Sensitivity analysis
 
-Consider pred-prey 
-BUT what will be the output - if we want to 'quantify sensitivity'
-useful to look at a single value or set of value
+Consider pred-prey BUT what will be the output - if we want to 'quantify
+sensitivity' useful to look at a single value or set of value
 
 For example
 
-* Max Prey Population
-* Min Prey Population
-
+-   Max Prey Population
+-   Min Prey Population
 
 # Sensitivity Analysis steps
 
-* Generate parameters (LHS, Sobol)
-* Metrics function
-* Wrapper Function
-* Run wrapper function to get metrics for all parameter sets
-* Graph and compute sensitivity statistics
+-   Generate parameters (LHS, Sobol)
+-   Metrics function
+-   Wrapper Function
+-   Run wrapper function to get metrics for all parameter sets
+-   Graph and compute sensitivity statistics
 
-NOTE - I've also given you an example using Latin Hypercube Sampling 
-* optional review
-
+NOTE - I've also given you an example using Latin Hypercube Sampling \*
+optional review
 
 ```{r odesen}
 
@@ -468,22 +484,27 @@ epi.prcc(cbind.data.frame(sens_pp, allres$minprey))
 
 ```
 
-
 # And just for fun
 
-* Lorenz Equations (for fluid dynamics), P, R, B are parameters (fixed values), x,y,z variables that change with time that describe how conveciton in the atmosphere works - a cell that is warmed from below and cooled from above
+-   Lorenz Equations (for fluid dynamics), P, R, B are parameters (fixed
+    values), x,y,z variables that change with time that describe how
+    conveciton in the atmosphere works - a cell that is warmed from
+    below and cooled from above
 
-* Developed by Meteorologist Edward Lorenz - early climate model development in 1960s
+-   Developed by Meteorologist Edward Lorenz - early climate model
+    development in 1960s
 
-  * fluid convection
-  * x rate of convective overturning
-  * y departure from linear horizontal temperature gradient
-  * z departure from linear vertical temperature difference
-  
+    -   fluid convection
+    -   x rate of convective overturning
+    -   y departure from linear horizontal temperature gradient
+    -   z departure from linear vertical temperature difference
 
-* Lorenz equations are example of dynamic systems that can exhibit stable and chaotic states depending on parameters and initial conditions
+-   Lorenz equations are example of dynamic systems that can exhibit
+    stable and chaotic states depending on parameters and initial
+    conditions
 
 Lets look at a Lorenz System with its interesting dynamics
+
 ```{r lorenze}
 # lorenze
 source("../R/lorenz.R")
@@ -510,4 +531,3 @@ ggplot(resl, aes(time, value, col=var))+geom_line()
 
 
 ```
-

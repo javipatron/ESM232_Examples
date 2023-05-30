@@ -13,8 +13,13 @@
 #' @return annual_min_err, annual_min_corr, low_month_cor, low_month_err
 
 
-compute_lowflowmetrics_all = function(m,o, month, day, year,wy, low_flow_months=8,
-                                      max_err_annual_min=NULL, max_err_low_month=NULL, wts=c(0.25,0.25,0.25,0.25)) {
+compute_lowflowmetrics_all = function(m,
+                                      o, 
+                                      month, day, year,wy, 
+                                      low_flow_months=8,
+                                      max_err_annual_min=NULL, 
+                                      max_err_low_month=NULL, 
+                                      wts=c(0.25,0.25,0.25,0.25)) {
 
 
   flow = cbind.data.frame(m,o, month, day, year,wy)
@@ -46,7 +51,7 @@ compute_lowflowmetrics_all = function(m,o, month, day, year,wy, low_flow_months=
     # apply weight (normalize in case they don't sum to 1)
   wts = wts/sum(wts)
 
-  combined = wts[1]*annual_min_err_trans + wts[2]*annual_min_cor+
+  combined = wts[1]*annual_min_err_trans + wts[2]*annual_min_cor +
               wts[3]*low_month_cor + wts[4]*low_month_err_trans
 
   return(list(annual_min_err=annual_min_err, annual_min_cor=annual_min_cor, low_month_err=low_month_err,

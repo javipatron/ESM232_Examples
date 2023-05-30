@@ -24,8 +24,10 @@
 
 lotvmod = function(t, pop, pars) {
 with(as.list(c(pars,pop)), {
+  
 dprey = rprey*prey -  alpha*prey*pred
 dpred = eff*alpha*prey*pred - pmort*pred
+
 return(list(c(dprey,dpred)))})
 }
 
