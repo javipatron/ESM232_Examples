@@ -29,7 +29,7 @@ library(ggpubr)
 nclasses = 5
 
 # create a growth matrix to store fertility and survivability information
-gmatrix=matrix(nrow=nclasses, ncol=nclasses)
+gmatrix = matrix(nrow=nclasses, ncol=nclasses)
 gmatrix
 
 # change NAs to zero
@@ -42,7 +42,7 @@ gmatrix
 fert =  c(0,0.4,0.3,0.1,0.01)
 
 # enter into our matrix
- gmatrix[1,]=fert
+ gmatrix[1,] = fert
  
  # now add survivability 
  # survivability (to the next class) is also per time step
@@ -78,7 +78,6 @@ p1
 
 
 
-
 sum(p1)
 sum(p0)
 
@@ -92,8 +91,11 @@ p2 = gmatrix %*% p1
 pop = cbind.data.frame(p0,p1,p2)
 pop$age = c("0-1","1-10","11-20","21-50","50 and above")
 
-popl = pop %>% pivot_longer(names_to="timestep",values_to="pop",-age)
-ggplot(popl, aes(timestep, pop,fill=as.factor(age)))+geom_col(position="dodge")+labs(fill="Age Group")
+popl = pop %>% pivot_longer(names_to = "timestep", values_to = "pop", -age)
+
+ggplot(popl, aes(timestep, pop,fill=as.factor(age))) + 
+  geom_col(position="dodge")+ 
+  labs(fill="Age Group")
 
 
 # how might you change parameters to have the population grow?
@@ -135,7 +137,7 @@ ini = c(235,224,182,124,95,69,42,24,6)
 ndecades = 15
 fert_china = c(0,F2,F3,F4,0,0,0,0,0)
 surv_china = c(p12,p23,p34,p45,p56,p67,p78,p89,p99)
-china_pop=evolve_pop(fert_china, surv_china, ini, ndecades)
+china_pop = evolve_pop(fert_china, surv_china, ini, ndecades)
 
 head(china_pop)
 
@@ -145,13 +147,21 @@ head(china_pop)
 # add decade 
 decade = seq(from=1, to=ndecades)
 china_tot = cbind.data.frame(decade=decade, poptot=china_pop$poptot)
-ggplot(china_tot, aes(decade, poptot))+geom_col()+labs(y="Total Popultation")
+
+ggplot(china_tot, aes(decade, poptot)) + 
+  geom_col() + 
+  labs(y="Total Popultation")
 
 
 # plot information about ages
 china_ages = cbind.data.frame(decade=decade, t(china_pop$popbyage))
+
 china_agesl = china_ages %>% pivot_longer(names_to="agecat", values_to="pop",-decade)
-ggplot(china_agesl, aes(decade, pop, fill=agecat))+geom_col()+labs(y="Population", fill="Age Group")
+
+ggplot(china_agesl, aes(decade, pop, fill=agecat)) + 
+  geom_col() +
+  labs(y="Population", fill="Age Group") +
+  scale_fill_brewer(palette = "Greens")
 
 ```
  
@@ -203,11 +213,11 @@ F2 = 2.0
 F3 = 0.3
 
 # initial population parameters
-ini = c(1000,1000, 1000)
+ini = c(1000, 1000, 1000)
 nmonths = 12
 fert_micro = c(F1,F2,F3)
 surv_micro = c(p12,p23,p34)
-micro_pop=evolve_pop(fert_micro, surv_micro, ini, nmonths)
+micro_pop= evolve_pop(fert_micro, surv_micro, ini, nmonths)
 
 # population after 12 months
 micro_pop$poptot[12]
@@ -246,14 +256,16 @@ p34 = 0.2
 
 # create our two samples for Sobel
 # first do our survivability
-ps1 = cbind.data.frame(p12=runif(min=0.4, max=0.92, n=nsample), p23 = runif(min=0.3, max=0.72, n=nsample),
+ps1 = cbind.data.frame(p12=runif(min=0.4, max=0.92, n=nsample), 
+                       p23 = runif(min=0.3, max=0.72, n=nsample),
                        p34 = runif(min=0.05, max=0.22, n=nsample))
 
-ps2 = cbind.data.frame(p12=runif(min=0.4, max=0.92, n=nsample), p23 = runif(min=0.3, max=0.72, n=nsample),
+ps2 = cbind.data.frame(p12=runif(min=0.4, max=0.92, n=nsample), 
+                       p23 = runif(min=0.3, max=0.72, n=nsample),
                        p34 = runif(min=0.05, max=0.22, n=nsample))
 
 # now include uncertainty in our Fertility
-F1= 0.0
+F1 = 0.0
 F2 = 2.0
 F3 = 0.3
 
@@ -283,7 +295,7 @@ colnames(sens_micro$X)=colnames(allp1)
 # run model and save what we care about: final population after 12 months 
 # this is already output by evolve_pop so we don't need a compute_metric function
 
-ini = c(1000,1000, 1000)
+ini = c(1000, 1000, 1000)
 nmonths = 12
 
 
@@ -298,14 +310,16 @@ return(finalpop=res$poptot[nstep])
 }
 
 # use pmap here so we can specify rows of our sensitivity analysis parameter object 
-res = as.data.frame(sens_micro$X) %>% pmap_dbl(p_wrapper, initialpop=ini, nstep=nmonths, use_func=evolve_pop)
+res = as.data.frame(sens_micro$X) %>% 
+  pmap_dbl(p_wrapper, initialpop=ini, nstep=nmonths, use_func=evolve_pop)
          
 # plot results (variation in final population across all parameter)
 # ggplot needs a dataframe - so do a quick conversion with data.frame
 ggplot(data.frame(finalpop=res), aes(x=finalpop))+geom_density()
 
 # or a boxplot
-ggplot(data.frame(finalpop=res), aes(x="", y=finalpop/1000) )+geom_boxplot(fill="blue")+
+ggplot(data.frame(finalpop=res), aes(x="", y=finalpop/1000) ) + 
+  geom_boxplot(fill="blue") +
   theme(axis.title.x = element_blank())+labs(y="Final Pop (in 1000s)")
 
 # give our results to sensitivity structure
@@ -326,7 +340,11 @@ sens_micro$T
 
 # graph the most sensitive parameter
 tmp = cbind.data.frame(sens_micro$X, pop12=sens_micro$y)
-ggplot(tmp, aes(p12, pop12))+geom_point()+labs(x="Survivability of 1 to older",y="pop after 12 months")
+ggplot(tmp, aes(p12, pop12)) + 
+  geom_point() + 
+  labs(x="Survivability of 1 to older",y="pop after 12 months")
+
+
 ```
 
 
