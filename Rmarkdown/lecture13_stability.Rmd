@@ -132,8 +132,6 @@ ggplot(tmp, aes(Ccurr, value, color=HarvestRate))+geom_point()+geom_hline(yinter
 # notice how with higher harvest rates the stable population will be lower
 
 
-
-
 ```
 
 # Stability in changing systems - just looking at dervatives
@@ -141,7 +139,6 @@ ggplot(tmp, aes(Ccurr, value, color=HarvestRate))+geom_point()+geom_hline(yinter
 Knowing the stability can help you understand the dynamics of the system
 
 If we start with a Forest Carbon of 50 and low harvest rate what will happen
-
 If we start with a Forest Carbon of 50 and a high harvest rate what will happen
 
 Try it to find out if you are right
@@ -155,8 +152,6 @@ colnames(res)=c("time","carbon")
 ggplot(as.data.frame(res), aes(time, carbon))+geom_point()+
   labs(y="Forest Biomass (kgC)", x="Year", title="low harvest rate")
   
-
-
 
 gps = list(harv=highHrate, K=100, r=0.05)
 Pinitial=50
